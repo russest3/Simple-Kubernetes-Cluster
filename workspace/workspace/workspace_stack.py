@@ -9,7 +9,7 @@ class WorkspaceStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        ami_id = "ami-024267eacd9cea07d"
+        ami_id = "ami-06d15e7bd1016764d"  # Updated to 1.34 ! 11/10
 
         vpc = ec2.Vpc(self, "Vpc",
             max_azs=1,
