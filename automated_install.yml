@@ -53,7 +53,6 @@
           {{ c1_cp1_public_ip }} c1-cp1.example.com c1-cp1
           {{ c1_node1_public_ip }} c1-node1.example.com c1-node1
           {{ c1_node2_public_ip }} c1-node2.example.com c1-node2
-          {{ c1_node3_public_ip }} c1-node3.example.com c1-node3
       become: true
     
 - hosts: c1-cp1
@@ -78,7 +77,6 @@
           {{ hostvars['localhost']['c1_cp1_private_ip'] }} c1-cp1.example.com c1-cp1
           {{ hostvars['localhost']['c1_node1_private_ip'] }} c1-node1.example.com c1-node1
           {{ hostvars['localhost']['c1_node2_private_ip'] }} c1-node2.example.com c1-node2
-          {{ hostvars['localhost']['c1_node3_private_ip'] }} c1-node3.example.com c1-node3
 
     - name: 'Output the join command to use in the following tasks to join nodes to the cluster'
       ansible.builtin.shell:
@@ -108,7 +106,6 @@
           {{ hostvars['localhost']['c1_cp1_private_ip'] }} c1-cp1.example.com c1-cp1
           {{ hostvars['localhost']['c1_node1_private_ip'] }} c1-node1.example.com c1-node1
           {{ hostvars['localhost']['c1_node2_private_ip'] }} c1-node2.example.com c1-node2
-          {{ hostvars['localhost']['c1_node3_private_ip'] }} c1-node3.example.com c1-node3
 
   post_tasks:
     - name: 'Get the join command'
@@ -145,44 +142,6 @@
           {{ hostvars['localhost']['c1_cp1_private_ip'] }} c1-cp1.example.com c1-cp1
           {{ hostvars['localhost']['c1_node1_private_ip'] }} c1-node1.example.com c1-node1
           {{ hostvars['localhost']['c1_node2_private_ip'] }} c1-node2.example.com c1-node2
-          {{ hostvars['localhost']['c1_node3_private_ip'] }} c1-node3.example.com c1-node3
-
-  post_tasks:
-    - name: 'Get the join command'
-      ansible.builtin.pause:
-        prompt: "Please paste in the join command: "
-      register: _join_command
-      delegate_to: localhost
-
-    - name: 'Run the join-command to join the node to the cluster'
-      ansible.builtin.shell:
-        cmd: |
-          set -o pipefail
-          {{ _join_command.user_input }}
-        executable: /bin/bash
-      changed_when: false
-
-- name: 'Configure c1-node3'
-  hosts: c1-node3
-  gather_facts: true
-  become: true
-  remote_user: ubuntu
-
-  vars_files:
-    - common_vars.yml
-
-  vars:
-    ansible_python_interpreter: '/usr/bin/python3'
-
-  tasks:
-    - name: 'Update /etc/hosts'
-      ansible.builtin.blockinfile:
-        path: /etc/hosts
-        block: |
-          {{ hostvars['localhost']['c1_cp1_private_ip'] }} c1-cp1.example.com c1-cp1
-          {{ hostvars['localhost']['c1_node1_private_ip'] }} c1-node1.example.com c1-node1
-          {{ hostvars['localhost']['c1_node2_private_ip'] }} c1-node2.example.com c1-node2
-          {{ hostvars['localhost']['c1_node3_private_ip'] }} c1-node3.example.com c1-node3
 
   post_tasks:
     - name: 'Get the join command'

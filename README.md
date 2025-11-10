@@ -1,5 +1,3 @@
-# How to get .kube/config working locally so kube proxy will work?
-
 # Build out a Kubernetes Cluster in an AWS VPC with Client VPN Endpoint using Cloud Development Kit in 5 minutes!
 
 ## Architecture
