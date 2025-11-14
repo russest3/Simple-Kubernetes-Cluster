@@ -73,7 +73,7 @@ class WorkspaceStack(Stack):
             "echo 'c1-cp1 > /etc/hostname'",
             "apt update -y",
             "apt upgrade -y",
-            "kubeadm init --kubernetes-version v1.34.1 --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=NumCPU,Mem",
+            "kubeadm init --kubernetes-version v1.34.1 --pod-network-cidr=10.244.0.0/16 --upload-certs --ignore-preflight-errors=NumCPU,Mem",
             "mkdir -p /home/ubuntu/.kube",
             "chown ubuntu:ubuntu /home/ubuntu/.kube",
             "cp /etc/kubernetes/admin.conf /home/ubuntu/.kube/config",
