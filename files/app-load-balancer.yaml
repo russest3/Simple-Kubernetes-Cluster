@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+  labels:
+    app: nginx-deploy
+  name: nginx-deploy
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-deploy
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: nginx-deploy
+    spec:
+      containers:
+      - image: nginx
+        name: nginx
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+  labels:
+    app: nginx-svc
+  name: nginx-svc
+  namespace: default
+spec:
+  clusterIP: 10.152.183.105
+  clusterIPs:
+  - 10.152.183.105
+  ports:
+  - name: 80-80
+    nodePort: 31984
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: nginx-deploy
+  type: NodePort
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx-ingress
+  namespace: default
+spec:
+  rules:
+  - host: localhost # localhost?
+    http:
+      paths:
+      - backend:
+          service:
+            name: nginx-svc
+            port:
+              number: 31984
+        path: /
+        pathType: Exact

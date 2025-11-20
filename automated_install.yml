@@ -153,8 +153,34 @@
     - name: 'Run the join-command to join the node to the cluster'
       ansible.builtin.shell:
         cmd: |
-          set -o pipefail
-          {{ _join_command.user_input }}
+             set -o pipefail
+             {{ _join_command.user_input }}
         executable: /bin/bash
       changed_when: false
+
+- hosts: c1-cp1
+  become: true
+  gather_facts: true
+  remote_user: ubuntu
+
+  vars_files:
+    - common_vars.yml
+
+  environment:
+    ANSIBLE_HOST_KEY_CHECKING: false
+
+  vars:
+    ansible_python_interpreter: '/usr/bin/python3'
+
+  tasks:
+    - block:
+        - name: 'Copy App With LoadBalancer to c1-cp1'
+          ansible.builtin.copy:
+            src: files/app-load-balancer.yaml
+            dest: ./
+        - name: 'Executing: App With LoadBalancer'
+          ansible.builtin.shell:
+            cmd: |
+                 set -o pipefail
+                 kubectl apply -f app-load-balancer.yaml
 ...
