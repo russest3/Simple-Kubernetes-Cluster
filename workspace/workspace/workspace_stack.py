@@ -67,6 +67,10 @@ class WorkspaceStack(Stack):
             ec2.Peer.any_ipv4(), ec2.Port.tcp(22), "allow ssh access from the world"
         )
 
+        worker_node_sg.add_ingress_rule(
+            ec2.Peer.any_ipv4(), ec2.Port.tcp(31984), "allow access to nodeports"
+        )
+
         c1_cp1_user_data = ec2.UserData.for_linux()
         c1_cp1_user_data.add_commands(
             "hostname c1-cp1",
@@ -84,7 +88,7 @@ class WorkspaceStack(Stack):
             "kubectl apply -f /home/ubuntu/kube-flannel.yml",
             "wget https://get.helm.sh/helm-v4.0.0-rc.1-linux-amd64.tar.gz",
             "tar -xvzf helm*",
-            "mv linux-amd64/helm /usr/local/bin/helm"
+            "mv linux-amd64/helm /usr/bin/helm"
             "kubeadm token create --print-join-command",
         )
 

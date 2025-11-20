@@ -173,14 +173,36 @@
     ansible_python_interpreter: '/usr/bin/python3'
 
   tasks:
-    - block:
-        - name: 'Copy App With LoadBalancer to c1-cp1'
-          ansible.builtin.copy:
-            src: files/app-load-balancer.yaml
-            dest: ./
-        - name: 'Executing: App With LoadBalancer'
-          ansible.builtin.shell:
-            cmd: |
-                 set -o pipefail
-                 kubectl apply -f app-load-balancer.yaml
+    - name: 'Copy App With LoadBalancer to c1-cp1'
+      ansible.builtin.copy:
+        src: files/app-load-balancer.yaml
+        dest: ./
+
+    - name: 'Executing: App With LoadBalancer'
+      ansible.builtin.shell:
+        cmd: kubectl apply -f ./app-load-balancer.yaml
+
+    - name: 'Add the EKS repo'
+      ansible.builtin.shell:
+        cmd: helm repo add eks https://aws.github.io/eks-charts
+
+    # - name: 'Query for VCP info'
+    #   amazon.aws.ec2_vpc_info:
+    #   register: vpc_info  
+    #   delegate_to: localhost
+
+    # - name: 'Parse output to get VPC id'
+    #   ansible.builtin.set_fact:
+    #     vpc_id: "{{ vpc_info | json_query(_query) }}"
+    #   vars:
+    #     _query: ""
+
+# Installing AWS loadbalancer controller with helm:
+# helm upgrade -i aws-load-balancer-controller eks/aws-load-balancer-controller \
+#   -n kube-system \
+#   --set clusterName=kubernetes \
+#   --set serviceAccount.create=false \
+#   --set serviceAccount.name=aws-load-balancer-controller \
+#   --set region=us-east-2 \
+#   --set vpcId=vpc-05f0cbdd13ba61b35
 ...

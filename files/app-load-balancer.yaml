@@ -1,3 +1,42 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: aws-load-balancer-controller
+  namespace: kube-system
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: aws-load-balancer-controller-role
+  namespace: kube-system
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - '*'
+  verbs:
+  - '*'
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: aws-load-balancer-controller-role-binding
+  namespace: kube-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: aws-load-balancer-controller-role
+subjects:
+- kind: ServiceAccount
+  name: aws-load-balancer-controller
+  namespace: kube-system
+
+---
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -34,15 +73,10 @@ metadata:
   labels:
     app: nginx-svc
   name: nginx-svc
-  namespace: default
 spec:
-  clusterIP: 10.152.183.105
-  clusterIPs:
-  - 10.152.183.105
   ports:
-  - name: 80-80
-    nodePort: 31984
-    port: 80
+  - name: 31984-80
+    port: 31984
     protocol: TCP
     targetPort: 80
   selector:
@@ -54,17 +88,29 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: nginx-ingress
-  namespace: default
+  name: my-app-ingress
+  annotations:
+    # Specify the IngressClass that the AWS Load Balancer Controller manages
+    kubernetes.io/ingress.class: alb
+    # Specify the name of the ALB
+    alb.ingress.kubernetes.io/load-balancer-name: my-application-alb
+    # Set the target type for the ALB's target groups to 'ip'
+    alb.ingress.kubernetes.io/target-type: ip
+    # Define the ALB scheme (internet-facing or internal)
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    # Configure health checks for the target group
+    alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
+    alb.ingress.kubernetes.io/healthcheck-port: '80'
+    alb.ingress.kubernetes.io/healthcheck-path: /healthz
+    alb.ingress.kubernetes.io/success-codes: '200'
 spec:
   rules:
-  - host: localhost # localhost?
-    http:
+  - http:
       paths:
-      - backend:
+      - path: /
+        pathType: Prefix
+        backend:
           service:
             name: nginx-svc
             port:
-              number: 31984
-        path: /
-        pathType: Exact
+              number: 80
