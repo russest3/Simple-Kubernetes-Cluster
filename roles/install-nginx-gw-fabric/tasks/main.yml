@@ -1,7 +1,4 @@
 ---
-- name: 'Getting node information...'
-  ansible.builtin.include_tasks: 'include_tasks/get_node_info.yml'
-
 # - name: 'Install the nginx gateway fabric crds'
 #   ansible.builtin.shell:
 #     cmd: "kubectl kustomize 'https://github.com/nginx/nginx-gateway-fabric/config/crd/gateway-api/standard?ref=v2.2.2' | kubectl apply -f -"
@@ -11,14 +8,12 @@
     release_name: ngf
     release_namespace: nginx-gateway
     chart_ref: oci://ghcr.io/nginx/charts/nginx-gateway-fabric
-    host: "https://{{ c1_cp1_public_ip }}:6443"
+    # host: "https://{{ hostvars['localhost'].['c1_node1_public_ip'] }}:6443"
     set_values:
-      - value: NodePort=nginx.service.type
-      - value: nginx.service.nodePorts="[{'port':31437,'listenerPort':80}]"
+      - value: nginx.service.type=NodePort
+      - value: nginx.service.nodePorts='[{"port":31437,"listenerPort":80}]'
         value_type: json
-    wait: true
-    update_repo_cache: true
-    
+    wait: true    
 
   # ansible.builtin.shell:
   #   cmd: "helm install ngf oci://ghcr.io/nginx/charts/nginx-gateway-fabric --create-namespace -n nginx-gateway --set nginx.service.type=NodePort --set-json 'nginx.service.nodePorts=[{"port":31437,"listenerPort":80}]'"
