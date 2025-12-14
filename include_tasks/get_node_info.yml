@@ -6,9 +6,9 @@
       "tag:Name": c1-cp1
   register: _c1_cp1_info
 
-# - name: 'Get private IP of c1-cp1'
-#   ansible.builtin.set_fact:
-#     c1_cp1_private_ip: "{{ _c1_cp1_info.instances[0].private_ip_address }}"
+- name: 'Get private IP of c1-cp1'
+  ansible.builtin.set_fact:
+    c1_cp1_private_ip: "{{ _c1_cp1_info.instances[0].private_ip_address }}"
 
 - name: 'Get public IP of c1-cp1'
   ansible.builtin.set_fact:
@@ -21,13 +21,9 @@
       "tag:Name": c1-node1
   register: _c1_node1_info
 
-# - name: 'Get public dns name of c1-node1'
-#   ansible.builtin.set_fact:
-#     c1_node1_name: "{{ _c1_node1_info.instances[0].public_dns_name }}"
-
-# - name: 'Get private IP of c1-node1'
-#   ansible.builtin.set_fact:
-#     c1_node1_private_ip: "{{ _c1_node1_info.instances[0].private_ip_address }}"
+- name: 'Get private IP of c1-node1'
+  ansible.builtin.set_fact:
+    c1_node1_private_ip: "{{ _c1_node1_info.instances[0].private_ip_address }}"
 
 - name: 'Get public IP of c1-node1'
   ansible.builtin.set_fact:

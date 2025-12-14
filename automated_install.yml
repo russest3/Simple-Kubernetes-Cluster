@@ -37,8 +37,8 @@
       ansible.builtin.blockinfile:
         path: /etc/hosts
         block: |
-          {{ hostvars['localhost']['c1_cp1_public_ip'] }} c1-cp1.example.com c1-cp1
-          {{ hostvars['localhost']['c1_node1_public_ip'] }} c1-node1.example.com c1-node1
+          {{ hostvars['localhost']['c1_cp1_private_ip'] }} c1-cp1.example.com c1-cp1
+          {{ hostvars['localhost']['c1_node1_private_ip'] }} c1-node1.example.com c1-node1
 
     - name: 'Output the join command to use in the following tasks to join nodes to the cluster'
       ansible.builtin.shell:
@@ -83,8 +83,8 @@
       ansible.builtin.blockinfile:
         path: /etc/hosts
         block: |
-          {{ hostvars['localhost']['c1_cp1_public_ip'] }} c1-cp1.example.com c1-cp1
-          {{ hostvars['localhost']['c1_node1_public_ip'] }} c1-node1.example.com c1-node1
+          {{ hostvars['localhost']['c1_cp1_private_ip'] }} c1-cp1.example.com c1-cp1
+          {{ hostvars['localhost']['c1_node1_private_ip'] }} c1-node1.example.com c1-node1
 
   post_tasks:
     - name: 'Get the join command'
@@ -111,8 +111,16 @@
 
   environment:
     ANSIBLE_HOST_KEY_CHECKING: false
-    K8S_AUTH_SSL_CA_CERT: /etc/kubernetes/pki/ca.crt
 
   roles:
     - install-nginx-gw-fabric
+
+  tasks:
+    - name: 'Copy over sample-test1.yaml'
+      ansible.builtin.copy:
+        src: sample-test1.yaml
+        dest: ./sample-test1.yaml
+
+    - name: 'Apply sample-test1.yaml'
+      ansible.builtin.shell: kubectl apply -f sample-test1.yaml
 ...

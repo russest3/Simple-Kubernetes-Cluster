@@ -13,7 +13,7 @@
     chart_ref: oci://ghcr.io/nginx/charts/nginx-gateway-fabric
     set_values:
       - value: nginx.service.type=NodePort
-      - value: "nginx.service.nodePorts=[{\"port\":31437,\"listenerPort\":80}]"
+      - value: "nginx.service.nodePorts=[{\"port\":30080,\"listenerPort\":80}]"
         value_type: json
     wait: true
 

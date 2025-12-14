@@ -1,0 +1,90 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: project-r500
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: mobile
+  name: mobile
+  namespace: project-r500
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mobile
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: mobile
+    spec:
+      containers:
+      - image: busybox
+        name: busybox
+        command: ["sleep", "9999999"]
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: desktop
+  name: desktop
+  namespace: project-r500
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: desktop
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: desktop
+    spec:
+      containers:
+      - image: busybox
+        name: busybox
+        command: ["sleep", "9999999"]
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: mobile
+  name: web-mobile
+  namespace: project-r500
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: mobile
+  type: ClusterIP
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: desktop
+  name: web-desktop
+  namespace: project-r500
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: desktop
+  type: ClusterIP
