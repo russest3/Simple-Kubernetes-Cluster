@@ -20,7 +20,8 @@
           {{ c1_node1_public_ip }} c1-node1.example.com c1-node1
       become: true
     
-- hosts: c1-cp1
+- name: 'Configure c1-cp1'
+  hosts: c1-cp1
   become: true
   gather_facts: true
   remote_user: ubuntu
@@ -47,6 +48,27 @@
         executable: /bin/bash
       changed_when: false
 
+- name: 'Configure c1-cp1'
+  hosts: c1-cp1
+  become: false
+  gather_facts: true
+  remote_user: ubuntu
+
+  vars_files:
+    - common_vars.yml
+  
+  environment:
+    ANSIBLE_HOST_KEY_CHECKING: false
+
+  tasks:
+    - name: 'Copy over kube-flannel.yml'
+      ansible.builtin.copy:
+        src: kube-flannel.yml
+        dest: /home/ubuntu/
+
+    - name: 'Apply kube-flannel.yml'
+      ansible.builtin.shell: kubectl apply -f ./kube-flannel.yml
+
 - name: 'Configure c1-node1'
   hosts: c1-node1
   gather_facts: true
@@ -64,20 +86,20 @@
           {{ hostvars['localhost']['c1_cp1_public_ip'] }} c1-cp1.example.com c1-cp1
           {{ hostvars['localhost']['c1_node1_public_ip'] }} c1-node1.example.com c1-node1
 
-  # post_tasks:
-  #   - name: 'Get the join command'
-  #     ansible.builtin.pause:
-  #       prompt: "Please paste in the join command: "
-  #     register: _join_command
-  #     delegate_to: localhost
+  post_tasks:
+    - name: 'Get the join command'
+      ansible.builtin.pause:
+        prompt: "Please paste in the join command: "
+      register: _join_command
+      delegate_to: localhost
 
-    # - name: 'Run the join-command to join the node to the cluster'
-    #   ansible.builtin.shell:
-    #     cmd: |
-    #       set -o pipefail
-    #       {{ _join_command.user_input }}
-    #     executable: /bin/bash
-    #   changed_when: false
+    - name: 'Run the join-command to join the node to the cluster'
+      ansible.builtin.shell:
+        cmd: |
+          set -o pipefail
+          {{ _join_command.user_input }}
+        executable: /bin/bash
+      changed_when: false
 
 - hosts: c1-cp1
   become: false

@@ -1,27 +1,27 @@
 ---
-# - name: 'Install the nginx gateway fabric crds'
-#   ansible.builtin.shell:
-#     cmd: "kubectl kustomize 'https://github.com/nginx/nginx-gateway-fabric/config/crd/gateway-api/standard?ref=v2.2.2' | kubectl apply -f -"
+- name: 'Create the nginx-gateway namespace'
+  ansible.builtin.shell:  "kubectl create ns nginx-gateway"
+
+- name: 'Install the nginx gateway fabric crds'
+  ansible.builtin.shell:
+    cmd: "kubectl kustomize 'https://github.com/nginx/nginx-gateway-fabric/config/crd/gateway-api/standard?ref=v2.2.2' | kubectl apply -f -"
 
 - name: 'Use helm to install the nginx-gateway'
   kubernetes.core.helm:
     release_name: ngf
     release_namespace: nginx-gateway
     chart_ref: oci://ghcr.io/nginx/charts/nginx-gateway-fabric
-    # host: "https://{{ hostvars['localhost'].['c1_node1_public_ip'] }}:6443"
     set_values:
       - value: nginx.service.type=NodePort
-      - value: nginx.service.nodePorts='[{"port":31437,"listenerPort":80}]'
+      - value: "nginx.service.nodePorts=[{\"port\":31437,\"listenerPort\":80}]"
         value_type: json
-    wait: true    
-
-  # ansible.builtin.shell:
-  #   cmd: "helm install ngf oci://ghcr.io/nginx/charts/nginx-gateway-fabric --create-namespace -n nginx-gateway --set nginx.service.type=NodePort --set-json 'nginx.service.nodePorts=[{"port":31437,"listenerPort":80}]'"
+    wait: true
 
 - name: 'Copy over the gateway class and http gateway yaml'
   ansible.builtin.copy:
     src: nginx-gateway.yaml
     dest: /home/ubuntu
+    force: true
 
 - name: 'Apply the gateway class and http gatway yaml'
   ansible.builtin.shell:  kubectl apply -f nginx-gateway.yaml

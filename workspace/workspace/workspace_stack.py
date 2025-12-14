@@ -81,14 +81,11 @@ class WorkspaceStack(Stack):
             "hostnamectl hostname c1-cp1",
             "apt update -y",
             "apt upgrade -y",
+            "python3 -m pip install kubernetes",
             "kubeadm init --kubernetes-version v1.34.1 --pod-network-cidr=10.244.0.0/16 --upload-certs --ignore-preflight-errors=NumCPU,Mem",
             "cp /etc/kubernetes/admin.conf /home/ubuntu/.kube/config",
             "chown ubuntu:ubuntu /home/ubuntu/.kube/config",
             "kubeadm token create --print-join-command",
-            "cp /root/kube-flannel.yml /home/ubuntu/",
-            "chown ubuntu: /home/ubuntu/kube-flannel.yml"
-            "sudo su - ubuntu"
-            "kubectl apply -f /home/ubuntu/kube-flannel.yml",
         )
 
         c1_cp1 = ec2.Instance(self, "ControlNode",
