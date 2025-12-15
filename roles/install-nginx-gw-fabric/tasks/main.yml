@@ -2,20 +2,37 @@
 - name: 'Create the nginx-gateway namespace'
   ansible.builtin.shell:  "kubectl create ns nginx-gateway"
 
-- name: 'Install the nginx gateway fabric crds'
+- name: 'Install the Gateway API resources'
   ansible.builtin.shell:
-    cmd: "kubectl kustomize 'https://github.com/nginx/nginx-gateway-fabric/config/crd/gateway-api/standard?ref=v2.2.2' | kubectl apply -f -"
+    # cmd: "kubectl kustomize 'https://github.com/nginx/nginx-gateway-fabric/config/crd/gateway-api/standard?ref=v2.2.2' | kubectl apply -f -"
+    cmd: kubectl kustomize "https://github.com/nginx/nginx-gateway-fabric/config/crd/gateway-api/standard?ref=v1.5.1" | kubectl apply -f -
 
-- name: 'Use helm to install the nginx-gateway'
-  kubernetes.core.helm:
-    release_name: ngf
-    release_namespace: nginx-gateway
-    chart_ref: oci://ghcr.io/nginx/charts/nginx-gateway-fabric
-    set_values:
-      - value: nginx.service.type=NodePort
-      - value: "nginx.service.nodePorts=[{\"port\":30080,\"listenerPort\":80}]"
-        value_type: json
-    wait: true
+- name: 'Deploy the nginx gateway fabric CRDs'
+  ansible.builtin.shell:
+    cmd: kubectl apply -f https://raw.githubusercontent.com/nginx/nginx-gateway-fabric/v1.6.1/deploy/crds.yaml
+
+- name: 'Deploy the nginx gateway fabric'
+  ansible.builtin.shell:
+    cmd: kubectl apply -f https://raw.githubusercontent.com/nginx/nginx-gateway-fabric/v1.6.1/deploy/nodeport/deploy.yaml
+
+- name: 'Update the nginx-gateway service to expose ports 30080 and 30081'
+  ansible.builtin.shell:
+    cmd: |
+      kubectl patch svc nginx-gateway -n nginx-gateway --type='json' -p='[
+      {"op": "replace", "path": "/spec/ports/0/nodePort", "value": 30080},
+      {"op": "replace", "path": "/spec/ports/1/nodePort", "value": 30081}
+      ]'
+
+# - name: 'Use helm to install the nginx-gateway'
+#   kubernetes.core.helm:
+#     release_name: ngf
+#     release_namespace: nginx-gateway
+#     chart_ref: oci://ghcr.io/nginx/charts/nginx-gateway-fabric
+#     set_values:
+#       - value: nginx.service.type=NodePort
+#       - value: "nginx.service.nodePorts=[{\"port\":30080,\"listenerPort\":80}]"
+#         value_type: json
+#     wait: true
 
 - name: 'Copy over the gateway class and http gateway yaml'
   ansible.builtin.copy:
